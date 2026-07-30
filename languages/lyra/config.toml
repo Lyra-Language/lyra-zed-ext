@@ -1,0 +1,24 @@
+name = "Lyra"
+grammar = "lyra"
+path_suffixes = ["lyra"]
+line_comments = ["// ", "/// "]
+block_comment = { start = "/*", prefix = "* ", end = "*/", tab_size = 1 }
+tab_size = 4
+hard_tabs = false
+autoclose_before = ";:.,=}])>"
+collapsed_placeholder = " /* ... */ "
+
+brackets = [
+    { start = "{", end = "}", close = true, newline = true },
+    { start = "[", end = "]", close = true, newline = true },
+    { start = "(", end = ")", close = true, newline = true },
+    { start = "<", end = ">", close = false, newline = true, not_in = ["string", "comment"] },
+    { start = "\"", end = "\"", close = true, newline = false, not_in = ["string", "comment"] },
+    { start = "'", end = "'", close = true, newline = false, not_in = ["string", "comment"] },
+    # Raw strings. `close = false` on the `#`-prefixed forms: typing the opening
+    # delimiter is several keystrokes, and auto-closing partway through turns `#\`` into
+    # `#\`\`` just as the user is about to type the second `#`.
+    { start = "`", end = "`", close = true, newline = false, not_in = ["string", "comment"] },
+    { start = "#`", end = "`#", close = false, newline = false, not_in = ["string", "comment"] },
+    { start = "/*", end = " */", close = true, newline = false, not_in = ["string", "comment"] },
+]

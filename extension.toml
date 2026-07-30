@@ -1,0 +1,19 @@
+id = "lyra"
+name = "Lyra"
+description = "Lyra language support — syntax highlighting and the lyra-lsp language server."
+version = "0.0.1"
+schema_version = 1
+authors = ["Avram Eisner <avrame@gmail.com>"]
+repository = "https://github.com/Lyra-Language/lyra-zed-ext"
+
+[language_servers.lyra-lsp]
+name = "lyra-lsp"
+language = "Lyra"
+
+# Zed clones this repo and compiles src/parser.c to wasm itself; it does not use the
+# sibling checkout. Bump `commit` whenever a grammar change lands that the queries in
+# languages/lyra/ depend on — and push tree-sitter-lyra first, or this pins a commit
+# that does not exist yet.
+[grammars.lyra]
+repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
+commit = "b29d2ba9bad956fa2cfbb55c65410e6aa2e60fa4"
