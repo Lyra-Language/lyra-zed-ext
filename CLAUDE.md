@@ -111,11 +111,14 @@ outright.
 
 Two properties of this particular grammar matter here:
 
-- **`src/parser.c` is ~115 MB and stored in Git LFS.** Without `git-lfs` installed, the
-  clone yields a pointer file and the grammar build fails on it — the same hard prerequisite
-  the workspace's `setup.sh` checks for up front.
-- **It is big but not too big.** It compiles in about 4 seconds to roughly 20 MB of object
-  code — heavy for a tree-sitter grammar, well within what Zed loads.
+- **`src/parser.c` is 12.8 MB of ordinary tracked text.** It used to be ~115 MB in Git LFS,
+  which made `git-lfs` a prerequisite for Zed's own clone of the grammar: without it the
+  clone yielded a pointer file and the grammar build failed on it. The `lambda_expr` rule
+  was rebuilt to stop a parser state explosion (62,663 states → 6,475) and the file left
+  LFS, so Zed needs nothing special now — **but pinning a commit from before that change
+  reintroduces the requirement**, since the pin decides which tree Zed clones.
+- **It is comfortably sized.** Roughly a tenth of what it was, and well within what Zed
+  loads.
 
 ## Relationship to Other Sub-Projects
 
