@@ -199,6 +199,13 @@
 (float_literal) @number
 (char_literal) @string.special.symbol
 
+; A negation's `-`. Without this the sign is the one unstyled character in
+; `-5`, since the rules above capture only the literal it wraps. It matters
+; most in a *pattern* — `-1 => …`, `-128..=-1 => …` — which became writable
+; only when tree-sitter-lyra a2588c5 gave pattern literals a sign; the same
+; `negation` node serves both positions, so one rule covers each.
+(negation operator: _ @operator)
+
 [
   (string_literal)
   (raw_string_literal)
