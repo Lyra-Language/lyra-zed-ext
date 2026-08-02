@@ -116,8 +116,16 @@
 (data_type_constructor
   name: (data_type_constructor_name) @constructor)
 
-; Applied — `Some(42)` parses as a named tuple literal.
+; Applied, parenthesized — `Some(42)` parses as a named tuple literal.
 (tuple_name) @constructor
+
+; Applied by juxtaposition — `Some 42`. A different node from the parenthesized
+; spelling: its name is a `data_type_name`, so without this rule it falls through
+; to the blanket `(data_type_name) @type` above and the same constructor renders
+; as a type or a constructor depending on which spelling was written. Placed after
+; that rule deliberately — Zed applies later patterns over earlier ones.
+(data_constructor_expr
+  constructor: (data_type_name) @constructor)
 
 ; Matched in a pattern — `Some x => …`.
 (data_pattern
