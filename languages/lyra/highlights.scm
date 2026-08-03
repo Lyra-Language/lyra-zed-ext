@@ -213,6 +213,7 @@
 ; only when tree-sitter-lyra a2588c5 gave pattern literals a sign; the same
 ; `negation` node serves both positions, so one rule covers each.
 (negation operator: _ @operator)
+(bitwise_not operator: _ @operator)
 
 [
   (string_literal)
@@ -245,6 +246,16 @@
   (div_assign_operator)
   (mod_assign_operator)
   (remainder_assign_operator)
+  (bitand_operator)
+  (bitor_operator)
+  (bitxor_operator)
+  (shl_operator)
+  (shr_operator)
+  (bitand_assign_operator)
+  (bitor_assign_operator)
+  (bitxor_assign_operator)
+  (shl_assign_operator)
+  (shr_assign_operator)
   (equals_operator)
   (not_equals_operator)
   (greater_than_operator)
