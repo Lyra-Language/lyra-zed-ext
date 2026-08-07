@@ -22,8 +22,8 @@ The extension is not in the Zed extension registry yet, so install it from a che
    ./build.sh
    ```
 
-   This writes `build/lyra-lsp` with `std/` symlinked beside it, which is where `lyrac`
-   looks for the standard library.
+   This writes `build/lyra-lsp` and `build/lyrac` with `std/` symlinked beside them,
+   which is where both look for the standard library.
 
 2. In Zed, open the Extensions page and click **Install Dev Extension**, then select this
    directory. (The command palette equivalent is `zed: install dev extension`.)
@@ -63,6 +63,20 @@ Prefer pointing at `build/lyra-lsp` over copying the binary somewhere on `PATH`:
 The server logs to `/tmp/lyra-lsp.log`. For extension-side problems, relaunch Zed from a
 terminal with `zed --foreground` to see INFO-level logs.
 
+## Compiling and running Lyra programs
+
+The extension is an editor client only — it reports diagnostics as you type but contributes
+no build task. Use the compiler CLI, `lyrac`, from a terminal:
+
+```bash
+lyrac check prog.lyra   # diagnostics only, no output file
+lyrac build prog.lyra   # compile to a native executable (./prog)
+lyrac run prog.lyra     # build to a temp location and execute it
+```
+
+`lyrac build` links with `clang`, so a C toolchain must be installed; `lyrac build
+--emit-llvm` stops at the LLVM IR and needs none.
+
 ## Development
 
 ```bash
@@ -89,10 +103,13 @@ Run the command above on all four `.scm` files after any grammar change.
 `src/parser.c` itself — it never reads the sibling checkout — so a grammar change reaches
 Zed only after it is pushed **and** the pin here is bumped to the new commit.
 
-`src/parser.c` is a ~115 MB file stored in Git LFS, so **git-lfs must be installed** for
-the clone to produce a real parser rather than an LFS pointer file. It compiles to roughly
-20 MB of object code, which is large for a tree-sitter grammar but well within what Zed
-loads.
+`src/parser.c` is 12.8 MB of ordinary tracked text, so the clone needs nothing special. It
+used to be ~115 MB in Git LFS, which made **git-lfs** a prerequisite: without it the clone
+produced a pointer file and the grammar build failed on it. Rebuilding the `lambda_expr`
+rule stopped a parser state explosion (62,663 states → 6,475) and the file left LFS.
+
+**Pinning a commit from before that change brings the requirement back**, since the pin
+decides which tree Zed clones.
 
 ## License
 

@@ -122,7 +122,10 @@ Two properties of this particular grammar matter here:
 
 ## Relationship to Other Sub-Projects
 
-- **`lyra/`** (Go) — builds the `lyra-lsp` this extension spawns (`./build.sh`).
+- **`lyra/`** (Go) — builds the `lyra-lsp` this extension spawns (`./build.sh`). The same
+  script produces `lyrac`, the compiler CLI — `check`, `build` (a native executable), and
+  `run` (build to a temp location and execute, 08/06). **Neither extension contributes a
+  build or run task**: they are language clients, and compiling is a terminal command.
 - **`tree-sitter-lyra/`** — the grammar, pinned by commit in `extension.toml`; also the
   home of the nvim-flavored `queries/highlights.scm` that this repo's queries parallel.
 - **`lyra-vscode-ext/`** — the same server, a different client. Behavior that should match
