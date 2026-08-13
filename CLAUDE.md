@@ -109,6 +109,13 @@ workspace's usual push-ordering rule applies with an extra step: push `tree-sitt
 first, then bump the `commit` here. A pin to an unpushed commit fails the grammar build
 outright.
 
+**A worked example, 08/13:** `highlights.scm` gained `(inner_doc_comment)` — the `//!`
+node added with documentation comments — in the same change that bumped the pin to
+`a721ede`. Those two edits belong in one commit, and the reason is that splitting them
+fails *latently*: the queries validate against the sibling checkout, where the node
+exists, and break only in Zed, where the pinned tree would not have it — and then break
+the whole file, so every Lyra buffer loses all highlighting rather than losing one rule.
+
 Two properties of this particular grammar matter here:
 
 - **`src/parser.c` is 12.8 MB of ordinary tracked text.** It used to be ~115 MB in Git LFS,

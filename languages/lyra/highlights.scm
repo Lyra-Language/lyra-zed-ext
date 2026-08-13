@@ -15,7 +15,11 @@
 ; =============================================================================
 
 (comment) @comment
+; `///` documents the declaration below it, `//!` the enclosing module. inner_doc_comment
+; arrived 08/13 — bump the grammar pin in extension.toml before installing, or Zed rejects
+; this whole file for naming a node its pinned tree does not have.
 (doc_comment) @comment.doc
+(inner_doc_comment) @comment.doc
 
 ; =============================================================================
 ; Keywords
