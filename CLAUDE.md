@@ -92,6 +92,33 @@ done
 Compiling is not enough — a pattern that is valid but never matches also "passes". Use a
 sample file that exercises every construct and confirm the captures actually fire.
 
+**The two files drift in both directions, and neither drift is visible from one side.**
+Checked 08/13 by listing every `*_type` node in `src/node-types.json` and diffing against
+both query files: this repo had `(rune_type)` and the grammar's own
+`queries/highlights.scm` did not, so `rune` rendered unstyled among highlighted primitives
+on the website — which reads that other file. Both were missing `(range_end_operator)`,
+which is a node rather than part of the `..` token, so the `<=` of `0..<=9` rendered
+unstyled beside a highlighted `..`: half an operator in the operator colour and half in
+body text. Both are fixed.
+
+The diff is worth re-running when the grammar gains a node — it takes seconds and finds
+what reading does not:
+
+```bash
+python3 -c "
+import json
+nt=json.load(open('src/node-types.json'))
+kinds=sorted({n['type'] for n in nt if n.get('named') and n['type'].endswith('_type')})
+for f in ['queries/highlights.scm','../lyra-zed-ext/languages/lyra/highlights.scm']:
+    q=open(f).read()
+    print(f, [k for k in kinds if '('+k+')' not in q and '('+k+' ' not in q])"
+```
+
+Read its output with judgement: most composite types (`array_type`, `lambda_type`,
+`weak_type`, `parameterized_type`, the `anonymous_*` pair) are structural wrappers whose
+*inner* type is the thing to capture, and highlighting the wrapper too would double-paint.
+What the list is for is spotting a missing **leaf**, which `rune_type` was.
+
 ## Outline: two binding patterns, anchored to different parents
 
 `outline.scm` matches bindings twice, deliberately: `(program (declaration …))` for every

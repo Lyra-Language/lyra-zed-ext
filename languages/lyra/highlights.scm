@@ -290,6 +290,10 @@
   "~"
 ] @operator
 
+; The range end operator is a node rather than part of the `..` token, so without
+; this the `<=` of `0..<=9` renders unstyled beside a highlighted `..`.
+(range_end_operator) @operator
+
 ; =============================================================================
 ; Punctuation
 ; =============================================================================
