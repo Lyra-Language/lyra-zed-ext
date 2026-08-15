@@ -32,6 +32,46 @@ Zed itself builds the extension on **Install Dev Extension** (Extensions page, o
 on `PATH` and installs the `wasm32-wasip1` target itself. `zed --foreground` shows
 INFO-level logs when something fails to load.
 
+## Do not rebuild the extension to pick up a new compiler
+
+The server binary is **external and resolved fresh at every spawn**, so a new `lyra-lsp`
+needs the *server* restarted (`editor: restart language server`), never the extension
+rebuilt. Rebuilding is both unnecessary and actively harmful: a reload **stops** the
+language servers the extension provides and does not reattach them to already-open
+buffers, so the server stays dead until Zed is restarted. Read straight off the log
+(`~/Library/Logs/Zed/Zed.log`):
+
+```
+finished compiling extension in 1.07s
+extensions updated. loading 0, reloading 1, unloading 0
+stopping language server lyra-lsp          <- and nothing after it
+```
+
+Rebuild only when *this repo* changes — `src/lyra.rs`, `extension.toml`, or a query — and
+restart Zed afterwards. The trap is that reaching for a rebuild is the natural response to
+"the language server seems stale", and it converts a stale server into no server at all.
+
+## A `lyra-lsp` on `PATH` must be a symlink, not a copy
+
+`PATH` is checked **before** the `build/lyra-lsp` fallback, so a copy there shadows the
+build output and pins the editor to whatever compiler was current when it was copied — the
+editor then reports diagnostics the CLI does not, which reads as an LSP bug rather than as
+staleness. A copy also lands the [`std/` adjacency](#server-path-resolution-srclyrars)
+problem the section below describes: nothing sits beside it, and `LYRA_STD` is normally
+unset.
+
+A symlink fixes both at once, because `stdRoot` resolves symlinks before taking the
+executable's directory (`lyra/CLAUDE.md`, Building — it exists for exactly this case), so
+the prelude is found beside the *target*:
+
+```bash
+ln -sf "$PWD/../lyra/build/lyra-lsp" ~/.local/bin/lyra-lsp
+```
+
+This is the workspace's own recurring lesson — `build/std` is a symlink rather than a copy
+for the same reason — and it cost an evening on 08/14: every staleness failure this project
+has hit presented as a *behaviour* difference rather than as staleness.
+
 ## Server path resolution (`src/lyra.rs`)
 
 In order: `lsp.lyra-lsp.binary.path` in Zed settings → `lyra-lsp` on `PATH` →
