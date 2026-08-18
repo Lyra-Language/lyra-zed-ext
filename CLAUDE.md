@@ -69,8 +69,8 @@ ln -sf "$PWD/../lyra/build/lyra-lsp" ~/.local/bin/lyra-lsp
 ```
 
 This is the workspace's own recurring lesson — `build/std` is a symlink rather than a copy
-for the same reason — and it cost an evening on 08/14: every staleness failure this project
-has hit presented as a *behaviour* difference rather than as staleness.
+for the same reason: every staleness failure this project has hit presented as a *behaviour*
+difference rather than as staleness.
 
 ## Server path resolution (`src/lyra.rs`)
 
@@ -133,16 +133,13 @@ Compiling is not enough — a pattern that is valid but never matches also "pass
 sample file that exercises every construct and confirm the captures actually fire.
 
 **The two files drift in both directions, and neither drift is visible from one side.**
-Checked 08/13 by listing every `*_type` node in `src/node-types.json` and diffing against
-both query files: this repo had `(rune_type)` and the grammar's own
-`queries/highlights.scm` did not, so `rune` rendered unstyled among highlighted primitives
-on the website — which reads that other file. Both were missing `(range_end_operator)`,
-which is a node rather than part of the `..` token, so the `<=` of `0..<=9` rendered
-unstyled beside a highlighted `..`: half an operator in the operator colour and half in
-body text. Both are fixed.
+A node this repo captures and the grammar's own `queries/highlights.scm` does not renders
+unstyled *on the website*, which reads that other file; and a node neither captures — like
+`range_end_operator`, a node rather than part of the `..` token — leaves half an operator
+in the operator colour and half in body text.
 
-The diff is worth re-running when the grammar gains a node — it takes seconds and finds
-what reading does not:
+Diff them whenever the grammar gains a node. It takes seconds and finds what reading does
+not:
 
 ```bash
 python3 -c "
@@ -176,30 +173,22 @@ workspace's usual push-ordering rule applies with an extra step: push `tree-sitt
 first, then bump the `commit` here. A pin to an unpushed commit fails the grammar build
 outright.
 
-**A worked example, 08/13:** `highlights.scm` gained `(inner_doc_comment)` — the `//!`
-node added with documentation comments — in the same change that bumped the pin to
-`a721ede`. Those two edits belong in one commit, and the reason is that splitting them
-fails *latently*: the queries validate against the sibling checkout, where the node
-exists, and break only in Zed, where the pinned tree would not have it — and then break
-the whole file, so every Lyra buffer loses all highlighting rather than losing one rule.
+**A query edit and the pin bump belong in one commit.** Splitting them fails *latently*:
+the queries validate against the sibling checkout, where a new node exists, and break only
+in Zed, where the pinned tree does not have it — and then break the whole file, so every
+Lyra buffer loses all highlighting rather than losing one rule.
 
-Two properties of this particular grammar matter here:
-
-- **`src/parser.c` is 12.8 MB of ordinary tracked text.** It used to be ~115 MB in Git LFS,
-  which made `git-lfs` a prerequisite for Zed's own clone of the grammar: without it the
-  clone yielded a pointer file and the grammar build failed on it. The `lambda_expr` rule
-  was rebuilt to stop a parser state explosion (62,663 states → 6,475) and the file left
-  LFS, so Zed needs nothing special now — **but pinning a commit from before that change
-  reintroduces the requirement**, since the pin decides which tree Zed clones.
-- **It is comfortably sized.** Roughly a tenth of what it was, and well within what Zed
-  loads.
+**`src/parser.c` is 12.8 MB of ordinary tracked text**, so Zed needs nothing special to
+clone the grammar — **but pinning a commit from before it left Git LFS reintroduces
+`git-lfs` as a prerequisite**, since the pin decides which tree Zed clones. Without it the
+clone yields a pointer file and the grammar build fails on it.
 
 ## Relationship to Other Sub-Projects
 
 - **`lyra/`** (Go) — builds the `lyra-lsp` this extension spawns (`./build.sh`). The same
-  script produces `lyrac`, the compiler CLI — `check`, `build` (a native executable), and
-  `run` (build to a temp location and execute, 08/06). **Neither extension contributes a
-  build or run task**: they are language clients, and compiling is a terminal command.
+  script produces `lyrac`, the compiler CLI — `check`, `build` (a native executable) and
+  `run`. **Neither extension contributes a build or run task**: they are language clients,
+  and compiling is a terminal command.
 - **`tree-sitter-lyra/`** — the grammar, pinned by commit in `extension.toml`; also the
   home of the nvim-flavored `queries/highlights.scm` that this repo's queries parallel.
 - **`lyra-vscode-ext/`** — the same server, a different client. Behavior that should match
