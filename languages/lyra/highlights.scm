@@ -29,6 +29,7 @@
   "let"
   "var"
   "const"
+  "extern"
   "where"
   "import"
   "module"
