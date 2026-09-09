@@ -40,6 +40,14 @@
   "struct" @context
   struct_name: (struct_name) @name) @item
 
+(union_type
+  (visibility)? @context
+  "union" @context
+  union_name: (union_name) @name) @item
+
+; Shared with `struct_type`: a union's body holds `struct_member` nodes, so this one
+; pattern gives both their fields. Without the `union_type` rule above, that meant a
+; union's members appeared in the outline while the union itself did not.
 (struct_member
   field_name: (field_name) @name) @item
 
