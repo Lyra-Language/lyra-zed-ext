@@ -38,6 +38,7 @@
 
 [
   "struct"
+  "union"
   "data"
   "newtype"
   "tuple"
@@ -106,6 +107,7 @@
 
 ; Aliased names for the same PascalCase identifier in specific declaration contexts.
 (struct_name) @type
+(union_name) @type
 (tuple_type_name) @type
 (constrained_type_name) @type
 (data_type_name) @type
