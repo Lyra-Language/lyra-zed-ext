@@ -117,6 +117,15 @@ Zed applies **later** patterns over earlier ones for the same node, so broad rul
 and context-specific overrides after — the same ordering discipline the grammar's own
 query file uses.
 
+**Ordering beats filing, and the two pull against each other.** A method call's property is
+also a `member_expr` property, so both rules match it; filed under "Function calls" by
+topic, the `@function.method` rule sat *before* the property rules and was simply dead —
+`n.weak()` painted as a field, in both query files, for as long as both had existed. A rule
+whose match is a subset of a later rule's has no effect, and nothing reports it: the
+`tree-sitter query` CLI lists every match without resolving precedence, so the dead rule
+still appears in its output. When two patterns can match one node, the narrower one goes
+last even if that splits a section.
+
 ## Verify queries against the grammar — every time
 
 A query naming a node type or field that does not exist makes Zed reject **the entire

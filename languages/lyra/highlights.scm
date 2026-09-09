@@ -161,10 +161,6 @@
 (call_expr
   function: (identifier) @function)
 
-(call_expr
-  function: (member_expr
-    property: (identifier) @function.method))
-
 (trait_method
   name: (identifier) @function.definition)
 
@@ -186,6 +182,13 @@
 
 (struct_field
   field_name: (field_name) @property)
+
+; After the four rules above, not with the other call rules: a method call's property is
+; also a `member_expr` property, so both match it. Later wins, so placed before them this
+; rule was dead and `n.weak()` painted as a field.
+(call_expr
+  function: (member_expr
+    property: (identifier) @function.method))
 
 ; =============================================================================
 ; Modules
