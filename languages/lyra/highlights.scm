@@ -208,6 +208,10 @@
 ; =============================================================================
 
 (boolean_literal) @boolean
+; `nullptr` is a value, not a control word, so it is styled with the other
+; literals rather than as a keyword — the same call every language makes for
+; `true`/`false`. It is the only raw-pointer form that is a literal at all.
+(nullptr_literal) @constant
 (integer_literal) @number
 (float_literal) @number
 (char_literal) @string.special.symbol
