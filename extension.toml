@@ -16,4 +16,4 @@ language = "Lyra"
 # that does not exist yet.
 [grammars.lyra]
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
-commit = "1f820fe1d6df52ae153590333f60819da88aee7c"
+commit = "310a001f62aca752810b3efe0f5a4a83abc85495"
