@@ -1,25 +1,23 @@
 # lyra-zed-ext — Project Context
 
-The official Zed extension for the Lyra programming language. Like `lyra-vscode-ext`, it is
-a thin LSP client — the language intelligence is all in the `lyra-lsp` binary from the
-sibling `lyra/` Go project. Unlike the VS Code extension, it also owns the **syntax
-highlighting queries**, because Zed highlights from tree-sitter rather than TextMate.
+Zed extension for Lyra: a thin LSP client for `lyra-lsp` (from `lyra/`). Unlike the VS Code
+extension it owns the **syntax highlighting queries**, since Zed highlights from tree-sitter.
 
 ## Structure
 
 ```
-extension.toml            — manifest: language server + the pinned grammar commit
-Cargo.toml                — cdylib built to wasm32-wasip1
-src/lyra.rs               — the entire extension (binary resolution)
-languages/lyra/config.toml    — file suffixes, comments, brackets, indent width
-languages/lyra/highlights.scm — syntax highlighting
+extension.toml                — manifest: language server + pinned grammar commit
+Cargo.toml                    — cdylib built to wasm32-wasip1
+src/lyra.rs                   — the entire extension (binary resolution)
+languages/lyra/config.toml    — suffixes, comments, brackets, indent width
+languages/lyra/highlights.scm — highlighting
 languages/lyra/brackets.scm   — bracket matching
 languages/lyra/indents.scm    — auto-indent
-languages/lyra/outline.scm    — outline, breadcrumbs, file symbol picker
-target/                   — cargo output (gitignored)
+languages/lyra/outline.scm    — outline, breadcrumbs, symbol picker
+target/                       — cargo output (gitignored)
 ```
 
-There is no test suite. The queries are verified with the tree-sitter CLI (below).
+No test suite; queries are verified with the tree-sitter CLI (below).
 
 ## Commands
 
@@ -27,74 +25,42 @@ There is no test suite. The queries are verified with the tree-sitter CLI (below
 cargo build --target wasm32-wasip1 --release   # typecheck the Rust half alone
 ```
 
-Zed itself builds the extension on **Install Dev Extension** (Extensions page, or
-`zed: install dev extension`), and rebuilds on `zed: reload extensions`. It needs `rustup`
-on `PATH` and installs the `wasm32-wasip1` target itself. `zed --foreground` shows
-INFO-level logs when something fails to load.
+Zed builds the extension on **Install Dev Extension** (`zed: install dev extension`) and
+rebuilds on `zed: reload extensions`. Needs `rustup` on `PATH` (installs `wasm32-wasip1`
+itself). `zed --foreground` shows INFO logs; Zed's log is `~/Library/Logs/Zed/Zed.log`.
 
 ## Do not rebuild the extension to pick up a new compiler
 
-The server binary is **external and resolved fresh at every spawn**, so a new `lyra-lsp`
-needs the *server* restarted (`editor: restart language server`), never the extension
-rebuilt. Rebuilding is both unnecessary and actively harmful: a reload **stops** the
-language servers the extension provides and does not reattach them to already-open
-buffers, so the server stays dead until Zed is restarted. Read straight off the log
-(`~/Library/Logs/Zed/Zed.log`):
-
-```
-finished compiling extension in 1.07s
-extensions updated. loading 0, reloading 1, unloading 0
-stopping language server lyra-lsp          <- and nothing after it
-```
-
-Rebuild only when *this repo* changes — `src/lyra.rs`, `extension.toml`, or a query — and
-restart Zed afterwards. The trap is that reaching for a rebuild is the natural response to
-"the language server seems stale", and it converts a stale server into no server at all.
+The server binary is resolved fresh at every spawn, so a new `lyra-lsp` needs only
+`editor: restart language server`. A reload **stops** the extension's language servers and
+does not reattach them to open buffers — the server stays dead until Zed restarts (log ends
+at `stopping language server lyra-lsp`). Rebuild only when this repo changes (`src/lyra.rs`,
+`extension.toml`, a query), then restart Zed.
 
 ## A `lyra-lsp` on `PATH` must be a symlink, not a copy
 
-`PATH` is checked **before** the `build/lyra-lsp` fallback, so a copy there shadows the
-build output and pins the editor to whatever compiler was current when it was copied — the
-editor then reports diagnostics the CLI does not, which reads as an LSP bug rather than as
-staleness. A copy also lands the [`std/` adjacency](#server-path-resolution-srclyrars)
-problem the section below describes: nothing sits beside it, and `LYRA_STD` is normally
-unset.
-
-A symlink fixes both at once, because `stdRoot` resolves symlinks before taking the
-executable's directory (`lyra/CLAUDE.md`, Building — it exists for exactly this case), so
-the prelude is found beside the *target*:
+`PATH` is checked before the `build/lyra-lsp` fallback, so a copy shadows the build output
+and pins a stale compiler (reads as an LSP bug), and has no `std/` beside it (`LYRA_STD` is
+normally unset). A symlink fixes both — `stdRoot` resolves symlinks first:
 
 ```bash
 ln -sf "$PWD/../lyra/build/lyra-lsp" ~/.local/bin/lyra-lsp
 ```
 
-This is the workspace's own recurring lesson — `build/std` is a symlink rather than a copy
-for the same reason: every staleness failure this project has hit presented as a *behaviour*
-difference rather than as staleness.
-
 ## Server path resolution (`src/lyra.rs`)
 
-In order: `lsp.lyra-lsp.binary.path` in Zed settings → `lyra-lsp` on `PATH` →
-`build/lyra-lsp` or `lyra/build/lyra-lsp` under the worktree root. Two build-output
-spellings because either the compiler repo or the whole workspace may be the open
-worktree.
+`lsp.lyra-lsp.binary.path` in Zed settings → `lyra-lsp` on `PATH` → `build/lyra-lsp` or
+`lyra/build/lyra-lsp` under the worktree root (compiler repo or whole workspace open).
+`./build.sh` puts `std/` beside the binaries, which is how the prelude is found.
 
-The build-output fallback exists for the same reason the VS Code extension defaults to
-`${workspaceFolder}/build/lyra-lsp`: `./build.sh` writes the binaries with `std/` symlinked
-beside them, and that adjacency is how the standard library is found. A `lyra-lsp` copied
-onto `PATH` by itself has no `std/` next to it, so preferring the build output also gets
-the prelude right.
+The existence probe is `fs::metadata` inside the WASI sandbox; a refused read looks like a
+missing file. The error message names every path tried and repeats the settings snippet.
 
-The existence probe is `fs::metadata` on an absolute path, from inside the extension's WASI
-sandbox. If the sandbox refuses the read it is indistinguishable from a missing file, and
-both fall through to the error message — which names every path tried and repeats the
-settings snippet, so a wrong guess here costs a sentence rather than a mystery.
+## Queries use Zed's capture vocabulary, not nvim's
 
-## Queries are Zed's vocabulary, not nvim's
-
-`languages/lyra/highlights.scm` is a **sibling** of
-`tree-sitter-lyra/queries/highlights.scm`, not a copy. That file targets the
-nvim-treesitter capture set; Zed's themes key off a different one:
+`languages/lyra/highlights.scm` is a deliberate **sibling** of
+`tree-sitter-lyra/queries/highlights.scm` (nvim-treesitter names), not a copy. Update both
+when the grammar gains a node.
 
 | nvim-treesitter | Zed |
 |---|---|
@@ -108,29 +74,19 @@ nvim-treesitter capture set; Zed's themes key off a different one:
 | `@function.method.call` | `@function.method` |
 | `@number.float` | `@number` |
 
-Zed resolves a capture name by walking *up* the dots, so the nvim names would mostly
-render — just as their nearest ancestor rather than the intended style, which is a subtle
-wrong-color rather than a visible failure. Hence two deliberate files. Both must be updated
-when the grammar gains a node.
+Zed falls back up the dots, so nvim names render in the wrong style rather than failing.
 
-Zed applies **later** patterns over earlier ones for the same node, so broad rules go first
-and context-specific overrides after — the same ordering discipline the grammar's own
-query file uses.
-
-**Ordering beats filing, and the two pull against each other.** A method call's property is
-also a `member_expr` property, so both rules match it; filed under "Function calls" by
-topic, the `@function.method` rule sat *before* the property rules and was simply dead —
-`n.weak()` painted as a field, in both query files, for as long as both had existed. A rule
-whose match is a subset of a later rule's has no effect, and nothing reports it: the
-`tree-sitter query` CLI lists every match without resolving precedence, so the dead rule
-still appears in its output. When two patterns can match one node, the narrower one goes
-last even if that splits a section.
+**Later patterns win** for the same node: broad rules first, narrower overrides after — even
+if that splits a topical section. A rule whose matches are a subset of a later rule's is
+dead, and `tree-sitter query` still lists its matches (it doesn't resolve precedence).
+Example: `@function.method` filed before the `member_expr` property rules painted `n.weak()`
+as a field.
 
 ## Verify queries against the grammar — every time
 
-A query naming a node type or field that does not exist makes Zed reject **the entire
-file**, so a Lyra buffer loses all highlighting at once instead of one rule silently going
-missing. Check all four before committing, from a `tree-sitter-lyra` checkout:
+A query naming a nonexistent node type or field makes Zed reject **the whole file** — all
+highlighting lost. From a `tree-sitter-lyra` checkout, with a sample exercising every
+construct (compiling isn't enough; confirm captures fire):
 
 ```bash
 for q in highlights brackets indents outline; do
@@ -138,17 +94,9 @@ for q in highlights brackets indents outline; do
 done
 ```
 
-Compiling is not enough — a pattern that is valid but never matches also "passes". Use a
-sample file that exercises every construct and confirm the captures actually fire.
-
-**The two files drift in both directions, and neither drift is visible from one side.**
-A node this repo captures and the grammar's own `queries/highlights.scm` does not renders
-unstyled *on the website*, which reads that other file; and a node neither captures — like
-`range_end_operator`, a node rather than part of the `..` token — leaves half an operator
-in the operator colour and half in body text.
-
-Diff them whenever the grammar gains a node. It takes seconds and finds what reading does
-not:
+The two highlight files drift both ways: a node only this repo captures renders unstyled on
+the website (which uses the grammar's file); a node neither captures (e.g.
+`range_end_operator`) paints half an operator. Diff them when the grammar gains a node:
 
 ```bash
 python3 -c "
@@ -160,45 +108,31 @@ for f in ['queries/highlights.scm','../lyra-zed-ext/languages/lyra/highlights.sc
     print(f, [k for k in kinds if '('+k+')' not in q and '('+k+' ' not in q])"
 ```
 
-Read its output with judgement: most composite types (`array_type`, `lambda_type`,
-`weak_type`, `parameterized_type`, the `anonymous_*` pair) are structural wrappers whose
-*inner* type is the thing to capture, and highlighting the wrapper too would double-paint.
-What the list is for is spotting a missing **leaf**, which `rune_type` was.
+Composite wrappers (`array_type`, `lambda_type`, `weak_type`, `parameterized_type`,
+`anonymous_*`) are expected in the output — capture their inner type. Look for missing
+**leaves** (as `rune_type` was).
 
-## Outline: two binding patterns, anchored to different parents
+## Outline: two binding patterns
 
-`outline.scm` matches bindings twice, deliberately: `(program (declaration …))` for every
-top-level `let`/`var` — the language's equivalent of a Rust `static` or `fn`, which belongs
-in the outline whatever its value — and `(block (declaration … value: (lambda_expr)))` for
-nested ones, so a function's local variables do not each become an entry. Anchoring them to
-different parents is what keeps a top-level function from matching both and appearing
-twice; tree-sitter queries cannot express the negation that a single pattern would need.
+`outline.scm` matches `(program (declaration …))` for every top-level `let`/`var`, and
+`(block (declaration … value: (lambda_expr)))` for nested functions only. Anchoring to
+different parents keeps a top-level function from appearing twice (queries can't negate).
 
 ## Grammar pin
 
-`[grammars.lyra]` in `extension.toml` pins `tree-sitter-lyra` by commit. **Zed clones that
-repo and compiles `src/parser.c` itself — it never reads the sibling checkout.** So the
-workspace's usual push-ordering rule applies with an extra step: push `tree-sitter-lyra`
-first, then bump the `commit` here. A pin to an unpushed commit fails the grammar build
-outright.
+`[grammars.lyra]` in `extension.toml` pins `tree-sitter-lyra` by commit; Zed clones that repo
+and compiles `src/parser.c` itself, never the sibling checkout.
 
-**A query edit and the pin bump belong in one commit.** Splitting them fails *latently*:
-the queries validate against the sibling checkout, where a new node exists, and break only
-in Zed, where the pinned tree does not have it — and then break the whole file, so every
-Lyra buffer loses all highlighting rather than losing one rule.
-
-**`src/parser.c` is 12.8 MB of ordinary tracked text**, so Zed needs nothing special to
-clone the grammar — **but pinning a commit from before it left Git LFS reintroduces
-`git-lfs` as a prerequisite**, since the pin decides which tree Zed clones. Without it the
-clone yields a pointer file and the grammar build fails on it.
+- Push `tree-sitter-lyra` first, then bump `commit`. A pin to an unpushed commit fails the build.
+- **A query edit and its pin bump go in one commit** — otherwise queries validate locally and
+  break the whole file in Zed.
+- After bumping, `rm -rf grammars` (gitignored cache) before Install Dev Extension, or Zed
+  logs "skipping compilation of lyra parser" and keeps the old grammar.
+- Pinning a commit from before `parser.c` left Git LFS makes `git-lfs` a prerequisite again.
 
 ## Relationship to Other Sub-Projects
 
-- **`lyra/`** (Go) — builds the `lyra-lsp` this extension spawns (`./build.sh`). The same
-  script produces `lyrac`, the compiler CLI — `check`, `build` (a native executable) and
-  `run`. **Neither extension contributes a build or run task**: they are language clients,
-  and compiling is a terminal command.
-- **`tree-sitter-lyra/`** — the grammar, pinned by commit in `extension.toml`; also the
-  home of the nvim-flavored `queries/highlights.scm` that this repo's queries parallel.
-- **`lyra-vscode-ext/`** — the same server, a different client. Behavior that should match
-  across editors (which binary is chosen, and why) is documented in both.
+- **`lyra/`** — `./build.sh` builds `lyra-lsp` and `lyrac`. Neither extension contributes a
+  build or run task; compiling is a terminal command.
+- **`tree-sitter-lyra/`** — the pinned grammar; home of the nvim-flavored `queries/highlights.scm`.
+- **`lyra-vscode-ext/`** — same server, different client; binary-selection behavior is documented in both.
