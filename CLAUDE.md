@@ -37,6 +37,15 @@ does not reattach them to open buffers — the server stays dead until Zed resta
 at `stopping language server lyra-lsp`). Rebuild only when this repo changes (`src/lyra.rs`,
 `extension.toml`, a query), then restart Zed.
 
+## A crashed server's diagnostics stay on screen
+
+If `lyra-lsp` crashes or is killed, its last diagnostics remain until
+`editor: restart language server`, which clears them. Zed never watches the server process: an
+exit only ends the tasks reading its output, and a server's diagnostics are cleared solely by
+`stop_local_language_server` (`crates/project/src/lsp_store.rs`), which a crash does not reach.
+Nothing on this side can fix it — a dead server sends nothing, and the extension API does not
+see the exit — so it is Zed's to change, not ours. Confirmed from Zed's source on 09/13.
+
 ## A `lyra-lsp` on `PATH` must be a symlink, not a copy
 
 `PATH` is checked before the `build/lyra-lsp` fallback, so a copy shadows the build output
