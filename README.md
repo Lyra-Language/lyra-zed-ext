@@ -7,6 +7,10 @@ indentation and outline from the
 symbols, references, rename, code actions, inlay hints, folding, semantic tokens), built from
 the [lyra](https://github.com/Lyra-Language/lyra) repo.
 
+A raw string marked `/* glsl */` is highlighted as GLSL, with no GLSL extension needed — the
+GLSL grammar and queries are bundled (queries from Zed's GLSL extension, Apache-2.0; see
+`LICENSE-GLSL`).
+
 ## Installing
 
 Not in the Zed registry yet; install from a checkout:

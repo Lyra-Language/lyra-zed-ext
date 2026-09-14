@@ -15,6 +15,8 @@ languages/lyra/brackets.scm   — bracket matching
 languages/lyra/indents.scm    — auto-indent
 languages/lyra/outline.scm    — outline, breadcrumbs, symbol picker
 languages/lyra/injections.scm — `/* glsl */` raw strings highlighted as GLSL
+languages/glsl/               — bundled GLSL (config, highlights, brackets, indents) for the injection
+LICENSE-GLSL                  — Apache-2.0, for languages/glsl/ (from Zed's GLSL extension)
 target/                       — cargo output (gitignored)
 ```
 
@@ -126,8 +128,18 @@ Composite wrappers (`array_type`, `lambda_type`, `weak_type`, `parameterized_typ
 
 `injections.scm` is a sibling of `tree-sitter-lyra/queries/injections.scm`; keep them identical
 apart from the header comment. It injects only `raw_string_content`, so it needs a grammar pin
-from after raw strings became three tokens. Highlighting the content needs Zed's **GLSL**
-extension; without it the content is unstyled.
+from after raw strings became three tokens.
+
+**GLSL is bundled**, so the injection highlights with nothing else installed:
+`[grammars.glsl]` pins `theHamsta/tree-sitter-glsl` at the commit Zed's own GLSL extension
+uses, and `languages/glsl/` copies that extension's queries (Apache-2.0, `LICENSE-GLSL`).
+
+- `config.toml` has **no `path_suffixes`**: the bundle serves injections only and must not
+  claim `.frag`/`.glsl` files.
+- If the GLSL extension is installed as well, both register `GLSL` over the same grammar
+  commit — keep the pin matched to that extension's so either one highlights identically.
+- Verify the queries from a `tree-sitter-glsl` checkout at the pin, against a shader, as for
+  Lyra's.
 
 ## Outline: two binding patterns
 

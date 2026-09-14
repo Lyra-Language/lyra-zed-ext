@@ -17,3 +17,8 @@ language = "Lyra"
 [grammars.lyra]
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
 commit = "9bc30b093b4fa9dd25098e68dbb439cab4bd3d92"
+
+# GLSL for /* glsl */ raw strings, pinned to the commit Zed's own GLSL extension uses.
+[grammars.glsl]
+repository = "https://github.com/theHamsta/tree-sitter-glsl"
+commit = "31064ce53385150f894a6c72d61b94076adf640a"

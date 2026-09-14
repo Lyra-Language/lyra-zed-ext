@@ -1,0 +1,13 @@
+# GLSL, bundled only so Lyra's /* glsl */ raw strings highlight (languages/lyra/injections.scm)
+# without Zed's GLSL extension installed. No path_suffixes: this extension does not claim
+# .glsl/.frag/... files. If the GLSL extension is installed too, both register "GLSL" over
+# the same tree-sitter-glsl commit, so whichever wins highlights the same way.
+name = "GLSL"
+grammar = "glsl"
+line_comments = ["// "]
+block_comment = { start = "/* ", prefix = "* ", end = "*/", tab_size = 1 }
+brackets = [
+    { start = "{", end = "}", close = true, newline = true },
+    { start = "[", end = "]", close = true, newline = true },
+    { start = "(", end = ")", close = true, newline = true },
+]
