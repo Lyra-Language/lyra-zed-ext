@@ -14,6 +14,7 @@ languages/lyra/highlights.scm — highlighting
 languages/lyra/brackets.scm   — bracket matching
 languages/lyra/indents.scm    — auto-indent
 languages/lyra/outline.scm    — outline, breadcrumbs, symbol picker
+languages/lyra/injections.scm — `/* glsl */` raw strings highlighted as GLSL
 target/                       — cargo output (gitignored)
 ```
 
@@ -98,7 +99,7 @@ highlighting lost. From a `tree-sitter-lyra` checkout, with a sample exercising 
 construct (compiling isn't enough; confirm captures fire):
 
 ```bash
-for q in highlights brackets indents outline; do
+for q in highlights brackets indents outline injections; do
   npx tree-sitter query ../lyra-zed-ext/languages/lyra/$q.scm sample.lyra
 done
 ```
@@ -120,6 +121,13 @@ for f in ['queries/highlights.scm','../lyra-zed-ext/languages/lyra/highlights.sc
 Composite wrappers (`array_type`, `lambda_type`, `weak_type`, `parameterized_type`,
 `anonymous_*`) are expected in the output — capture their inner type. Look for missing
 **leaves** (as `rune_type` was).
+
+## Injections
+
+`injections.scm` is a sibling of `tree-sitter-lyra/queries/injections.scm`; keep them identical
+apart from the header comment. It injects only `raw_string_content`, so it needs a grammar pin
+from after raw strings became three tokens. Highlighting the content needs Zed's **GLSL**
+extension; without it the content is unstyled.
 
 ## Outline: two binding patterns
 
