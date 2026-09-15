@@ -96,6 +96,7 @@
   (rune_type)
   (void_type)
   (self_type)
+  (hole_type)
 ] @type.builtin
 
 "Self" @type.builtin
