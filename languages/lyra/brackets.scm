@@ -4,6 +4,10 @@
 ("[" @open
   "]" @close)
 
+; A fixed array literal opens with the single token `#[`.
+("#[" @open
+  "]" @close)
+
 ("{" @open
   "}" @close)
 
