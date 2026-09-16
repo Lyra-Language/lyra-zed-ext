@@ -4,8 +4,8 @@ The official [Zed](https://zed.dev) extension for Lyra: syntax highlighting, bra
 indentation and outline from the
 [tree-sitter-lyra](https://github.com/Lyra-Language/tree-sitter-lyra) grammar, plus the
 `lyra-lsp` language server (diagnostics, hover, go-to-definition, completion, signature help,
-symbols, references, rename, code actions, inlay hints, folding, semantic tokens), built from
-the [lyra](https://github.com/Lyra-Language/lyra) repo.
+symbols, references, rename, code actions, inlay hints, folding, semantic tokens, and
+**formatting**), built from the [lyra](https://github.com/Lyra-Language/lyra) repo.
 
 A raw string marked `/* glsl */` is highlighted as GLSL, with no GLSL extension needed — the
 GLSL grammar and queries are bundled (queries from Zed's GLSL extension, Apache-2.0; see
@@ -42,6 +42,25 @@ Zed compiles the extension to wasm and builds the grammar on install. It needs `
 
 After rebuilding the compiler, run `editor: restart language server` — don't reload the
 extension. Server log: `/tmp/lyra-lsp.log`; extension log: launch `zed --foreground`.
+
+## Formatting
+
+`format` and format-on-save go through the language server, which runs **lyrafmt** — the
+formatter written in Lyra. Nothing is configured here: `./build.sh` in the compiler repo
+puts `build/lyrafmt` beside `build/lyra-lsp` when the machine can build it (a C compiler,
+`libtree-sitter`, and the `tree-sitter-lyra` checkout), and the server looks for it at
+`$LYRA_FMT`, then on `PATH`, then beside itself.
+
+```json
+{
+  "languages": {
+    "Lyra": { "formatter": "language_server", "format_on_save": "on" }
+  }
+}
+```
+
+With no `lyrafmt` on the machine, formatting does nothing rather than reporting an error —
+the buffer is never half-formatted.
 
 ## Compiling and running Lyra programs
 

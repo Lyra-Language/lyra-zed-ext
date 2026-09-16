@@ -32,6 +32,13 @@ Zed builds the extension on **Install Dev Extension** (`zed: install dev extensi
 rebuilds on `zed: reload extensions`. Needs `rustup` on `PATH` (installs `wasm32-wasip1`
 itself). `zed --foreground` shows INFO logs; Zed's log is `~/Library/Logs/Zed/Zed.log`.
 
+## Formatting is the server's, not this extension's
+
+`lyra-lsp` implements `textDocument/formatting` by running `lyrafmt`, so `format` and
+format-on-save need nothing here — no `config.toml` field, no wasm change — and a new
+formatter is picked up by restarting the server like any other compiler change. See
+`lyra/cmd/lyra-lsp/README.md`.
+
 ## Do not rebuild the extension to pick up a new compiler
 
 The server binary is resolved fresh at every spawn, so a new `lyra-lsp` needs only
