@@ -209,6 +209,10 @@
 (attribute
   name: (identifier) @attribute)
 
+; A named argument's name — `pkg` in `@link("SDL3", pkg: "sdl3")`.
+(attribute_named_arg
+  name: (identifier) @property)
+
 ; =============================================================================
 ; Literals
 ; =============================================================================
