@@ -40,7 +40,8 @@
   "struct"
   "union"
   "data"
-  "newtype"
+  "type"
+  "alias"
   "tuple"
   "trait"
   "impl"
@@ -113,6 +114,7 @@
 (union_name) @type
 (tuple_type_name) @type
 (constrained_type_name) @type
+(type_alias_name) @type
 (data_type_name) @type
 
 ; A trait is an interface, and Zed themes style it apart from a concrete type.

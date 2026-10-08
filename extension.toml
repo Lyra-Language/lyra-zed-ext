@@ -16,7 +16,7 @@ language = "Lyra"
 # that does not exist yet.
 [grammars.lyra]
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
-commit = "04a9f0a7d50f1711c2b1e6fa966e8ca466fc3d69"
+commit = "342f19eed817830c3ea0a73f0c4e3a6da2b47d28"
 
 # GLSL for /* glsl */ raw strings, pinned to the commit Zed's own GLSL extension uses.
 [grammars.glsl]

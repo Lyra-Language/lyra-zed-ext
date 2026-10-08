@@ -66,8 +66,13 @@
 
 (constrained_type
   (visibility)? @context
-  "newtype" @context
+  "type" @context
   name: (constrained_type_name) @name) @item
+
+(type_alias
+  (visibility)? @context
+  "alias" @context
+  name: (type_alias_name) @name) @item
 
 ; =============================================================================
 ; Traits and implementations
