@@ -51,6 +51,8 @@
   "if"
   "else"
   "match"
+  "loop"
+  "while"
   "for"
   "in"
   "return"
