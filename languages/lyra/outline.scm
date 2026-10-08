@@ -89,3 +89,17 @@
 
 (trait_method_implementation
   method_name: (method_name) @name) @item
+
+; `impl Person { let say_hi = … }`: the block is an item and its members nest under it.
+; Its members are `declaration`s under `inherent_members`, which neither binding pattern
+; above is anchored to, so none appears twice.
+(inherent_implementation
+  "impl" @context
+  type: (_) @name) @item
+
+(inherent_members
+  (declaration
+    (visibility)? @context
+    keyword: _ @context
+    modifiers: (fn_modifiers)? @context
+    name: (identifier) @name) @item)
