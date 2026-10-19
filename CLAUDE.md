@@ -201,6 +201,10 @@ for q in highlights brackets injections; do
 done
 ```
 
+**Its diagnostics are lyra-lsp's**: `extension.toml` lists the server for both languages
+(`languages = ["Lyra", "Lui"]` — `language`, singular, is deprecated in Zed's manifest),
+and the server diagnoses a `.lui` buffer at its own lines by running `lui` beside itself.
+
 The injections need `#set! injection.include-children`: a code node's nested braces and
 strings are its children, and without it they would be cut out of the injected Lyra. CSS
 is Zed's own language.

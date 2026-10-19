@@ -8,7 +8,8 @@ repository = "https://github.com/Lyra-Language/lyra-zed-ext"
 
 [language_servers.lyra-lsp]
 name = "lyra-lsp"
-language = "Lyra"
+# `.lui` markup too: the server diagnoses it through the Lyra lui generates from it.
+languages = ["Lyra", "Lui"]
 
 # Zed clones this repo and compiles src/parser.c to wasm itself; it does not use the
 # sibling checkout. Bump `commit` whenever a grammar change lands that the queries in
