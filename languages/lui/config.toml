@@ -1,0 +1,14 @@
+name = "Lui"
+grammar = "lui"
+path_suffixes = ["lui"]
+block_comment = { start = "<!-- ", prefix = "", end = " -->", tab_size = 0 }
+tab_size = 2
+hard_tabs = false
+autoclose_before = ">}\"]),"
+
+brackets = [
+    { start = "<", end = ">", close = false, newline = true, not_in = ["string", "comment"] },
+    { start = "{", end = "}", close = true, newline = true },
+    { start = "\"", end = "\"", close = true, newline = false, not_in = ["string", "comment"] },
+    { start = "<!--", end = " -->", close = true, newline = false, not_in = ["string", "comment"] },
+]

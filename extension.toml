@@ -18,6 +18,13 @@ language = "Lyra"
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
 commit = "342f19eed817830c3ea0a73f0c4e3a6da2b47d28"
 
+# `.lui` markup (lyra/tools/lui): a second grammar in tree-sitter-lyra, in its `lui/`
+# directory. Its queries are languages/lui/; bump `commit` as for `lyra`, pushed first.
+[grammars.lui]
+repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
+commit = "ca6e2a73da0565394a87de94e899a8609343917c"
+path = "lui"
+
 # GLSL for /* glsl */ raw strings, pinned to the commit Zed's own GLSL extension uses.
 [grammars.glsl]
 repository = "https://github.com/theHamsta/tree-sitter-glsl"

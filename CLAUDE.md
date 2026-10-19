@@ -16,6 +16,8 @@ languages/lyra/indents.scm    — auto-indent
 languages/lyra/outline.scm    — outline, breadcrumbs, symbol picker
 languages/lyra/injections.scm — `/* glsl */` raw strings highlighted as GLSL
 languages/glsl/               — bundled GLSL (config, highlights, brackets, indents) for the injection
+languages/lui/                — `.lui` markup (lyra/tools/lui): highlights, brackets, injections (Lyra in `{…}` and
+                                <script>, CSS in <style>); grammar `lui`, from tree-sitter-lyra's `lui/` directory
 LICENSE-GLSL                  — Apache-2.0, for languages/glsl/ (from Zed's GLSL extension)
 target/                       — cargo output (gitignored)
 ```
@@ -172,3 +174,33 @@ and compiles `src/parser.c` itself, never the sibling checkout.
   build or run task; compiling is a terminal command.
 - **`tree-sitter-lyra/`** — the pinned grammar; home of the nvim-flavored `queries/highlights.scm`.
 - **`lyra-vscode-ext/`** — same server, different client; binary-selection behavior is documented in both.
+
+## `.lui` markup
+
+`languages/lui/` highlights the markup `lyra/tools/lui` generates into Lyra. Its grammar is
+**`tree-sitter-lyra/lui/`**, a second grammar in that repository, reached by the manifest's
+`path` key (`GrammarManifestEntry.path` in Zed's `extension_manifest.rs`; the docs do not
+mention it):
+
+```toml
+[grammars.lui]
+repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
+commit = "…"
+path = "lui"
+```
+
+**Bump its `commit` as `lyra`'s is: pushed first** — a pin to a commit the remote lacks
+fails the extension's build, Lyra's highlighting included. The two pins move apart: a
+`lui/` change needs only this one. Its queries are the
+sibling of `tree-sitter-lyra/lui/queries/` in the opposite order (later wins here, first
+there), and are verified the same way, from `tree-sitter-lyra/lui`:
+
+```bash
+for q in highlights brackets injections; do
+  ../node_modules/.bin/tree-sitter query ../../lyra-zed-ext/languages/lui/$q.scm ../../lyra/examples/imgui/components_view.lui
+done
+```
+
+The injections need `#set! injection.include-children`: a code node's nested braces and
+strings are its children, and without it they would be cut out of the injected Lyra. CSS
+is Zed's own language.
