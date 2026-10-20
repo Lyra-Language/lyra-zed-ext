@@ -23,7 +23,7 @@ commit = "1c3772af5a978a5a4012c408bd912e9407c5e7cc"
 # directory. Its queries are languages/lui/; bump `commit` as for `lyra`, pushed first.
 [grammars.lui]
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
-commit = "ca6e2a73da0565394a87de94e899a8609343917c"
+commit = "ca2b8e70aa0d90b1801b5987951f734b204d959f"
 path = "lui"
 
 # GLSL for /* glsl */ raw strings, pinned to the commit Zed's own GLSL extension uses.

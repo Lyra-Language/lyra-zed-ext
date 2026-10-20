@@ -201,6 +201,9 @@ for q in highlights brackets injections; do
 done
 ```
 
+**A component's props** (`props={{ name: Type = default }}`) are their own nodes: a name
+is `@variable.parameter`, a type `@type`, and a default injected as Lyra.
+
 **Its diagnostics are lyra-lsp's**: `extension.toml` lists the server for both languages
 (`languages = ["Lyra", "Lui"]` — `language`, singular, is deprecated in Zed's manifest),
 and the server diagnoses a `.lui` buffer at its own lines by running `lui` beside itself.

@@ -4,3 +4,4 @@
 ("</" @open ">" @close)
 (code "{" @open "}" @close)
 ("\"" @open "\"" @close)
+(props "{{" @open "}}" @close)
