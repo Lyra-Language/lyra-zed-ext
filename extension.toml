@@ -17,7 +17,7 @@ languages = ["Lyra", "Lui"]
 # that does not exist yet.
 [grammars.lyra]
 repository = "https://github.com/Lyra-Language/tree-sitter-lyra"
-commit = "144edb7e98a70c4111030c54746e57df32e6378f"
+commit = "6290e686c9b051d69252f5f9c9ef44f8e8f83142"
 
 # `.lui` markup (lyra/tools/lui): a second grammar in tree-sitter-lyra, in its `lui/`
 # directory. Its queries are languages/lui/; bump `commit` as for `lyra`, pushed first.

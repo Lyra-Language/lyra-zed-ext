@@ -149,6 +149,8 @@
 
 (identifier) @variable
 (const_identifier) @constant
+; `vdp.SCREEN_WIDTH`, one token: a namespace's constant, painted whole.
+(qualified_const_name) @constant
 
 (parameter
   pattern: (identifier) @variable.parameter)
