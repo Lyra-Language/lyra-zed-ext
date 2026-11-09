@@ -94,6 +94,7 @@
   (signed_integer_type)
   (unsigned_integer_type)
   (float_type)
+  (fixed_point_type)
   (string_type)
   (boolean_type)
   (rune_type)
